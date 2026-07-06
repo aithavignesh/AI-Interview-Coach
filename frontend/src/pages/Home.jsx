@@ -42,20 +42,20 @@ function Home() {
 
           <FeatureCard
             icon="💻"
-            title="Technical"
-            description="Practice DSA, DBMS, OS and CN."
+            title="Technical Interview"
+            description="Practice DSA, DBMS, Operating Systems and Computer Networks."
           />
 
           <FeatureCard
             icon="🤖"
             title="AI Feedback"
-            description="Receive detailed AI evaluation."
+            description="Receive instant AI evaluation, scoring and improvement suggestions."
           />
 
           <FeatureCard
             icon="📄"
             title="Resume Analysis"
-            description="Upload your resume for personalized questions."
+            description="Upload your resume and get personalized interview questions."
           />
         </div>
       </section>
