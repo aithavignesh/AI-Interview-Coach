@@ -1,13 +1,27 @@
 import { useState } from "react";
 import api from "../services/api";
-
+import InterviewSetup from "../components/InterviewSetup";
+import QuestionCard from "../components/QuestionCard";
+import AnswerBox from "../components/AnswerBox";
+import EvaluationCard from "../components/EvaluationCard";
+import FinalReport from "../components/FinalReport";
 function Interview() {
-  const [role, setRole] = useState("Software Engineer");
+  const [role, setRole] =useState("Software Engineer");
   const [type, setType] = useState("Technical");
   const [difficulty, setDifficulty] = useState("Medium");
+
   const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
+  const [evaluation, setEvaluation] = useState(null);
+
   const [loading, setLoading] = useState(false);
 
+  // Interview Progress
+  const [currentQuestion, setCurrentQuestion] = useState(1);
+  const [history, setHistory] = useState([]);
+  const totalQuestions = 10;
+
+  // Generate AI Question
   const generateQuestion = async () => {
     setLoading(true);
 
@@ -19,110 +33,151 @@ function Interview() {
       });
 
       setQuestion(response.data.question);
+      setAnswer("");
+      setEvaluation(null);
     } catch (error) {
       console.error(error);
 
       if (error.response) {
         alert(
-          `Error ${error.response.status}\n${JSON.stringify(
+          `Status: ${error.response.status}\n${JSON.stringify(
             error.response.data
           )}`
         );
       } else {
-        alert("Failed to generate question. Please try again.");
+        alert("Failed to generate question.");
       }
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center py-12 px-6">
+  // Submit Answer
+  const submitAnswer = async () => {
+    if (answer.trim() === "") {
+      alert("Please enter your answer.");
+      return;
+    }
 
-      <h1 className="text-5xl font-bold text-gray-800 mb-10">
+    setLoading(true);
+
+    try {
+      const response = await api.post("/gemini/evaluate", {
+  question,
+  answer,
+});
+
+// Show evaluation on screen
+setEvaluation(response.data);
+
+// Save interview history
+const interviewResult = {
+  question,
+  answer,
+  score: response.data.score,
+  feedback: response.data.feedback,
+  strengths: response.data.strengths,
+  weaknesses: response.data.weaknesses,
+};
+
+setHistory((prev) => [...prev, interviewResult]);
+
+console.log("History Updated:", interviewResult);
+    } catch (error) {
+      console.error(error);
+
+      if (error.response) {
+        alert(
+          `Status: ${error.response.status}\n${JSON.stringify(
+            error.response.data
+          )}`
+        );
+      } else {
+        alert("Failed to evaluate answer.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Next Question
+  const nextQuestion = async () => {
+  if (currentQuestion < totalQuestions) {
+    setCurrentQuestion((prev) => prev + 1);
+    generateQuestion();
+  } else {
+    const average =
+      history.reduce((sum, item) => sum + item.score, 0) /
+      history.length;
+
+    try {
+      const response = await api.post("/interview/save", {
+        user_id: 1, // We'll replace this later with the logged-in user
+        role,
+        interview_type: type,
+        difficulty,
+        average_score: average,
+      });
+
+      alert("🎉 Interview Completed!");
+      console.log(response.data);
+
+    } catch (error) {
+      console.error(error);
+      alert("Failed to save interview.");
+    }
+  }
+};
+
+  return (
+    <div className="min-h-screen bg-gray-100 py-10 px-6">
+
+      <h1 className="text-5xl font-bold text-center mb-10">
         🤖 AI Interview Coach
       </h1>
 
-      <div className="bg-white shadow-xl rounded-xl p-8 w-full max-w-xl">
+      {/* Settings */}
 
-        {/* Role */}
+<InterviewSetup
+  role={role}
+  setRole={setRole}
+  type={type}
+  setType={setType}
+  difficulty={difficulty}
+  setDifficulty={setDifficulty}
+  loading={loading}
+  generateQuestion={generateQuestion}
+/>
 
-        <label className="font-semibold text-gray-700">
-          Job Role
-        </label>
+      {/* Question */}
 
-        <input
-          type="text"
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          className="w-full border rounded-lg p-3 mt-2 mb-5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Software Engineer"
-        />
+{question && (
+  <div className="max-w-4xl mx-auto mt-10 bg-white rounded-xl shadow-xl p-8">
 
-        {/* Interview Type */}
+    <QuestionCard
+  question={question}
+  currentQuestion={currentQuestion}
+  totalQuestions={totalQuestions}
+/>
 
-        <label className="font-semibold text-gray-700">
-          Interview Type
-        </label>
+    <AnswerBox
+  answer={answer}
+  setAnswer={setAnswer}
+  submitAnswer={submitAnswer}
+  loading={loading}
+/>
 
-        <select
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-          className="w-full border rounded-lg p-3 mt-2 mb-5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option>Technical</option>
-          <option>HR</option>
-          <option>Coding</option>
-        </select>
+    {/* AI Evaluation */}
 
-        {/* Difficulty */}
-
-        <label className="font-semibold text-gray-700">
-          Difficulty
-        </label>
-
-        <select
-          value={difficulty}
-          onChange={(e) => setDifficulty(e.target.value)}
-          className="w-full border rounded-lg p-3 mt-2 mb-8 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option>Easy</option>
-          <option>Medium</option>
-          <option>Hard</option>
-        </select>
-
-        {/* Button */}
-
-        <button
-          onClick={generateQuestion}
-          disabled={loading}
-          className={`w-full py-3 rounded-lg text-white font-semibold transition duration-300 ${
-            loading
-              ? "bg-gray-500 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700"
-          }`}
-        >
-          {loading ? "Generating AI Question..." : "Generate Question"}
-        </button>
-
-      </div>
-
-      {/* Question Card */}
-
-      {question && (
-        <div className="mt-10 bg-white shadow-xl rounded-xl p-8 max-w-4xl w-full">
-
-          <h2 className="text-2xl font-bold text-blue-600 mb-4">
-            🎯 Interview Question
-          </h2>
-
-          <p className="text-lg leading-8 text-gray-700">
-            {question}
-          </p>
-
-        </div>
-      )}
-
+    <EvaluationCard
+  evaluation={evaluation}
+  currentQuestion={currentQuestion}
+  totalQuestions={totalQuestions}
+  nextQuestion={nextQuestion}
+/>
+  </div>
+)}
+<FinalReport history={history} />
     </div>
   );
 }
