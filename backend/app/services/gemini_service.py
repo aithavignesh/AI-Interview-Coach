@@ -1,27 +1,24 @@
 import os
+import json
 from pathlib import Path
 
 from dotenv import load_dotenv
 from google import genai
 
-env_path = Path(__file__).resolve().parents[2] / ".env"
-
-print("ENV PATH:", env_path)
-print("ENV EXISTS:", env_path.exists())
-
-load_dotenv(env_path)
-
-print("API KEY:", os.getenv("GEMINI_API_KEY"))
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
+
 def generate_interview_question(role, interview_type, difficulty):
     prompt = f"""
-    Generate ONE {difficulty} {interview_type} interview question
-    for the role of {role}.
+You are an experienced interviewer.
 
-    Only return the question.
-    """
+Generate ONE {difficulty} level {interview_type} interview question
+for the role of {role}.
+
+Only return the question.
+"""
 
     response = client.models.generate_content(
         model="gemini-2.5-flash",
@@ -29,3 +26,45 @@ def generate_interview_question(role, interview_type, difficulty):
     )
 
     return response.text
+
+
+def evaluate_answer(question, answer):
+    prompt = f"""
+You are a professional technical interviewer.
+
+Question:
+{question}
+
+Candidate Answer:
+{answer}
+
+Evaluate the answer.
+
+Return ONLY valid JSON in the following format:
+
+{{
+    "score": 8.5,
+    "strengths": [
+        "...",
+        "..."
+    ],
+    "weaknesses": [
+        "...",
+        "..."
+    ],
+    "feedback": "..."
+}}
+"""
+
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+    )
+
+    text = response.text.strip()
+
+    # Remove markdown if Gemini wraps JSON in ```json ... ```
+    if text.startswith("```"):
+        text = text.replace("```json", "").replace("```", "").strip()
+
+    return json.loads(text)

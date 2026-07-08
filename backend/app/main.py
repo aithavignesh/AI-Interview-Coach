@@ -1,8 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from app.routers import interview, auth, gemini
-
+from app.models.user import User
+from app.models.interview import Interview
+from app.models.interview_question import InterviewQuestion
+from app.database.database import Base, engine
+Base.metadata.create_all(bind=engine)
 app = FastAPI(title="AI Interview Coach API")
 
 # CORS Configuration
