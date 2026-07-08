@@ -69,7 +69,13 @@ function Interview() {
 
 // Show evaluation on screen
 setEvaluation(response.data);
-
+await api.post("/interview/question/save", {
+  interview_id: 1, // Temporary (we'll replace this later)
+  question,
+  answer,
+  score: response.data.score,
+  feedback: response.data.feedback,
+});
 // Save interview history
 const interviewResult = {
   question,
