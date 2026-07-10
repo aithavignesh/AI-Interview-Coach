@@ -5,7 +5,27 @@ from sqlalchemy.orm import Session
 
 from app.database.database import SessionLocal
 from app.models.user import User
+from datetime import datetime, timedelta
+from jose import jwt
+SECRET_KEY = "your_secret_key_123"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
+
+def create_access_token(data: dict):
+    to_encode = data.copy()
+
+    expire = datetime.utcnow() + timedelta(
+        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+    )
+
+    to_encode.update({"exp": expire})
+
+    return jwt.encode(
+        to_encode,
+        SECRET_KEY,
+        algorithm=ALGORITHM
+    )
 router = APIRouter(
     prefix="/auth",
     tags=["Authentication"]
@@ -44,7 +64,11 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 @router.post("/login")
 def login(user: UserLogin, db: Session = Depends(get_db)):
 
+    print("Email received:", user.email)
+
     existing_user = db.query(User).filter(User.email == user.email).first()
+
+    print("User found:", existing_user)
 
     if not existing_user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -52,7 +76,19 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     if not verify_password(user.password, existing_user.password):
         raise HTTPException(status_code=401, detail="Invalid password")
 
+    token = create_access_token(
+    {
+        "sub": str(existing_user.id)
+    }
+)
+
     return {
         "message": "Login successful",
-        "user": existing_user.fullname
+        "access_token": token,
+        "token_type": "bearer",
+        "user": {
+            "id": existing_user.id,
+            "fullname": existing_user.fullname,
+            "email": existing_user.email
+        }
     }

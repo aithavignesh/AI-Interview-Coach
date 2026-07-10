@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import interview, auth, gemini
+from app.routers import interview, auth, gemini,resume
 from app.models.user import User
 from app.models.interview import Interview
 from app.models.interview_question import InterviewQuestion
@@ -23,7 +23,7 @@ app.add_middleware(
 app.include_router(interview.router)
 app.include_router(auth.router)
 app.include_router(gemini.router)
-
+app.include_router(resume.router)
 @app.get("/")
 def home():
     return {"message": "Welcome to AI Interview Coach"}

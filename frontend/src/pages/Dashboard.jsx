@@ -4,6 +4,7 @@ import StatCard from "../components/StatCard";
 
 function Dashboard() {
   const [history, setHistory] = useState([]);
+  const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     loadHistory();
@@ -11,7 +12,7 @@ function Dashboard() {
 
   const loadHistory = async () => {
     try {
-      const response = await api.get("/interview/history/1");
+      const response = await api.get("/interview/history");
       setHistory(response.data);
     } catch (error) {
       console.error(error);

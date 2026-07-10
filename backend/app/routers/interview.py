@@ -6,6 +6,7 @@ from app.models.interview import Interview
 from app.schemas.interview import InterviewCreate, InterviewResponse
 from app.models.interview_question import InterviewQuestion
 from app.schemas.interview_question import InterviewQuestionCreate
+from app.utils.auth import get_current_user
 router = APIRouter(prefix="/interview", tags=["Interview"])
 
 
@@ -18,26 +19,19 @@ def get_db():
 
 
 @router.post("/save")
-def save_interview(data: InterviewCreate, db: Session = Depends(get_db)):
+def save_interview(
+    data: InterviewCreate,
+    current_user: int = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
     interview = Interview(
-        user_id=data.user_id,
+        user_id=current_user,
         role=data.role,
         interview_type=data.interview_type,
         difficulty=data.difficulty,
         average_score=data.average_score,
     )
 
-
-@router.get("/history/{user_id}", response_model=List[InterviewResponse])
-def get_history(user_id: int, db: Session = Depends(get_db)):
-    interviews = (
-        db.query(Interview)
-        .filter(Interview.user_id == user_id)
-        .order_by(Interview.created_at.desc())
-        .all()
-    )
-
-    return interviews
     db.add(interview)
     db.commit()
     db.refresh(interview)
@@ -46,6 +40,22 @@ def get_history(user_id: int, db: Session = Depends(get_db)):
         "message": "Interview saved successfully",
         "id": interview.id,
     }
+
+
+@router.get("/history")
+def get_history(
+    current_user: int = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    interviews = (
+        db.query(Interview)
+        .filter(Interview.user_id == current_user)
+        .order_by(Interview.created_at.desc())
+        .all()
+    )
+
+    return interviews
+    
 @router.post("/question/save")
 def save_question(
     data: InterviewQuestionCreate,
@@ -67,3 +77,23 @@ def save_question(
         "message": "Question saved successfully",
         "id": question.id,
     }
+@router.put("/update/{interview_id}")
+def update_interview(
+    interview_id: int,
+    average_score: float,
+    db: Session = Depends(get_db),
+):
+    interview = (
+        db.query(Interview)
+        .filter(Interview.id == interview_id)
+        .first()
+    )
+
+    if not interview:
+        return {"message": "Interview not found"}
+
+    interview.average_score = average_score
+
+    db.commit()
+
+    return {"message": "Interview updated successfully"}

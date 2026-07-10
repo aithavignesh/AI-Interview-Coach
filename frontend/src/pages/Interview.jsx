@@ -6,6 +6,7 @@ import AnswerBox from "../components/AnswerBox";
 import EvaluationCard from "../components/EvaluationCard";
 import FinalReport from "../components/FinalReport";
 function Interview() {
+  const user = JSON.parse(localStorage.getItem("user"));
   const [role, setRole] =useState("Software Engineer");
   const [type, setType] = useState("Technical");
   const [difficulty, setDifficulty] = useState("Medium");
@@ -19,6 +20,7 @@ function Interview() {
   // Interview Progress
   const [currentQuestion, setCurrentQuestion] = useState(1);
   const [history, setHistory] = useState([]);
+  const [interviewId, setInterviewId] = useState(null);
   const totalQuestions = 10;
 
   // Generate AI Question
@@ -26,11 +28,37 @@ function Interview() {
     setLoading(true);
 
     try {
-      const response = await api.post("/gemini/question", {
+      // Create Interview only once
+if (!interviewId) {
+
+    const avg = 0;
+
+    const saveInterview = await api.post("/interview/save", {
+
+        user_id: user.id,
+
         role,
+
         interview_type: type,
+
         difficulty,
-      });
+
+        average_score: avg,
+
+    });
+
+    setInterviewId(saveInterview.data.id);
+}
+
+const response = await api.post("/gemini/question", {
+
+    role,
+
+    interview_type: type,
+
+    difficulty,
+
+});
 
       setQuestion(response.data.question);
       setAnswer("");
@@ -70,7 +98,7 @@ function Interview() {
 // Show evaluation on screen
 setEvaluation(response.data);
 await api.post("/interview/question/save", {
-  interview_id: 1, // Temporary (we'll replace this later)
+  interview_id: interviewId, // Temporary (we'll replace this later)
   question,
   answer,
   score: response.data.score,
@@ -113,25 +141,21 @@ console.log("History Updated:", interviewResult);
     generateQuestion();
   } else {
     const average =
-      history.reduce((sum, item) => sum + item.score, 0) /
-      history.length;
+  history.reduce((sum, item) => sum + item.score, 0) /
+  history.length;
 
-    try {
-      const response = await api.post("/interview/save", {
-        user_id: 1, // We'll replace this later with the logged-in user
-        role,
-        interview_type: type,
-        difficulty,
-        average_score: average,
-      });
+await api.put(
+  `/interview/update/${interviewId}`,
+  null,
+  {
+    params: {
+      average_score: average,
+    },
+  }
+);
 
-      alert("🎉 Interview Completed!");
-      console.log(response.data);
-
-    } catch (error) {
-      console.error(error);
-      alert("Failed to save interview.");
-    }
+alert("🎉 Interview Completed!");
+setInterviewId(null);
   }
 };
 
