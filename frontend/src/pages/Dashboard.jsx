@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import api from "../services/api";
 import StatCard from "../components/StatCard";
-
+import DashboardCharts from "../components/DashboardCharts";
+import PerformanceCard from "../components/PerformanceCard";
 function Dashboard() {
   const [history, setHistory] = useState([]);
   const user = JSON.parse(localStorage.getItem("user"));
@@ -40,7 +42,10 @@ function Dashboard() {
     history.length > 0
       ? Math.min(...history.map((item) => item.average_score))
       : 0;
-
+  const readiness = Math.min(
+  100,
+  Math.round((Number(averageScore) / 10) * 100)
+);
   return (
     <div className="min-h-screen bg-gray-100 p-10">
 
@@ -77,7 +82,85 @@ function Dashboard() {
         />
 
       </div>
+      {/* Quick Actions */}
 
+<div className="bg-white rounded-2xl shadow-lg p-8 mb-10">
+
+  <h2 className="text-3xl font-bold mb-6">
+    🚀 Quick Actions
+  </h2>
+
+  <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+    <Link
+      to="/interview"
+      className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl p-6 text-center font-bold transition"
+    >
+      🎤 Mock Interview
+    </Link>
+
+    <Link
+      to="/resume"
+      className="bg-green-600 hover:bg-green-700 text-white rounded-xl p-6 text-center font-bold transition"
+    >
+      📄 Resume Analyzer
+    </Link>
+
+    <Link
+      to="/coding"
+      className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl p-6 text-center font-bold transition"
+    >
+      💻 Coding Interview
+    </Link>
+
+    <Link
+      to="/company-interview"
+      className="bg-orange-600 hover:bg-orange-700 text-white rounded-xl p-6 text-center font-bold transition"
+    >
+      🏢 Company Interview
+    </Link>
+    <Link
+  to="/coding-history"
+  className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl p-6 text-center font-bold transition"
+>
+  📜 Coding History
+</Link>
+  </div>
+
+</div>
+<DashboardCharts history={history} />
+
+<div className="mt-10">
+  <PerformanceCard average={averageScore} />
+</div>
+
+<div className="mt-10 bg-white rounded-2xl shadow-lg p-8">
+
+  <h2 className="text-3xl font-bold mb-5">
+    🎯 Interview Readiness
+  </h2>
+
+  <div className="flex items-center justify-between">
+
+    <div>
+
+      <h3 className="text-6xl font-bold text-green-600">
+        {readiness}%
+      </h3>
+
+      <p className="text-gray-600 mt-2">
+        Based on your interview performance.
+      </p>
+
+    </div>
+
+    <div className="text-8xl">
+      🎯
+    </div>
+
+  </div>
+
+</div>
       {/* Interview History */}
 
       <div className="bg-white rounded-2xl shadow-lg p-8">

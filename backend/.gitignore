@@ -1,12 +1,26 @@
-# Virtual Environment
-venv/
-
-# Environment Variables
-.env
-
-# Python Cache
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+venv/
+.env
 
-# SQLite Database
+# Database
 *.db
+
+# Reports
+reports/
+
+# Node
+node_modules/
+
+# Vite
+dist/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

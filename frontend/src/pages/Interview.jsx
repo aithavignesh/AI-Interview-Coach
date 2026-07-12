@@ -35,7 +35,6 @@ if (!interviewId) {
 
     const saveInterview = await api.post("/interview/save", {
 
-        user_id: user.id,
 
         role,
 

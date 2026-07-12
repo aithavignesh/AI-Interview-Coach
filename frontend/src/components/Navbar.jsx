@@ -59,7 +59,12 @@ function Navbar() {
             >
               Resume
             </Link>
-
+            <Link
+  to="/coding"
+  className="hover:text-blue-600 font-medium"
+>
+  Coding
+</Link>
             <button
               onClick={logout}
               className="px-5 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition"

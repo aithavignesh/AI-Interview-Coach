@@ -1,5 +1,8 @@
 import json
+import time
 from app.services.gemini_service import client
+
+MODEL = "gemini-3.5-flash"
 
 
 def generate_resume_questions(resume_text, difficulty):
@@ -7,7 +10,7 @@ def generate_resume_questions(resume_text, difficulty):
     prompt = f"""
 You are an expert technical interviewer.
 
-Based on the following resume, generate 5 interview questions.
+Based on the following resume, generate exactly 5 interview questions.
 
 Resume:
 {resume_text}
@@ -15,7 +18,7 @@ Resume:
 Difficulty:
 {difficulty}
 
-Return ONLY valid JSON.
+Return ONLY valid JSON in the following format:
 
 {{
     "questions": [
@@ -28,21 +31,34 @@ Return ONLY valid JSON.
 }}
 """
 
-    try:
-        response = client.models.generate_content(
-            model="gemini-3.5-flash",
-            contents=prompt,
-        )
-    except Exception as e:
-        print("Gemini Error:", e)
+    for attempt in range(3):
+        try:
+            response = client.models.generate_content(
+                model=MODEL,
+                contents=prompt,
+            )
 
-        return {
-            "error": str(e)
-        }
+            if not response.text:
+                raise Exception("Empty response from Gemini")
 
-    result = response.text.strip()
+            result = response.text.strip()
 
-    if result.startswith("```json"):
-        result = result.replace("```json", "").replace("```", "").strip()
+            print("\n========== RESUME QUESTIONS ==========")
+            print(result)
+            print("======================================\n")
 
-    return json.loads(result)
+            if result.startswith("```json"):
+                result = result.replace("```json", "").replace("```", "").strip()
+
+            return json.loads(result)
+
+        except Exception as e:
+            print(f"Attempt {attempt + 1} failed:", e)
+
+            if attempt < 2:
+                time.sleep(3)
+            else:
+                return {
+                    "questions": [],
+                    "error": str(e)
+                }
