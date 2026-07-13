@@ -9,6 +9,7 @@ import Resume from "./pages/Resume";
 import CodingInterview from "./pages/CodingInterview";
 import ProtectedRoute from "./components/ProtectedRoute";
 import CompanyInterview from "./pages/CompanyInterview";
+import CodingHistory from "./pages/CodingHistory";
 function App() {
   return (
     <BrowserRouter>

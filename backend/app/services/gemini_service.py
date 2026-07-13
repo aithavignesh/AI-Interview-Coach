@@ -12,7 +12,6 @@ load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 # API Key
 api_key = os.getenv("GEMINI_API_KEY")
 
-print("Loaded API Key:", api_key[:10] + "..." if api_key else "No Key Found")
 
 # Gemini Client
 client = genai.Client(api_key=api_key)

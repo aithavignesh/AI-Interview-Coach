@@ -1,8 +1,8 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 
 class InterviewCreate(BaseModel):
-    user_id: int
     role: str
     interview_type: str
     difficulty: str
@@ -16,6 +16,8 @@ class InterviewResponse(BaseModel):
     interview_type: str
     difficulty: str
     average_score: float
+    created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
