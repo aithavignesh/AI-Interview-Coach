@@ -140,7 +140,6 @@ npm run dev
 
 ## 📊 Dashboard
 
-## 📊 Dashboard
 
 ![Dashboard](screenshots/dashboard.png)
 
@@ -148,7 +147,6 @@ npm run dev
 
 ## 💻 Coding Interview
 
-## 💻 Coding Interview
 
 ![Coding Interview](screenshots/coding.png)
 
@@ -157,7 +155,6 @@ npm run dev
 
 ## 📄 Resume Analyzer
 
-## 📄 Resume Analyzer
 
 ![Resume Analyzer](screenshots/resume.png)
 
