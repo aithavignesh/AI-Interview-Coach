@@ -137,7 +137,11 @@ npm run dev
 ![Home](screenshots/home.png)
 
 ---
+## Login
 
+![Login](screenshots/login.png)
+
+---
 ## 📊 Dashboard
 
 
@@ -157,6 +161,11 @@ npm run dev
 
 
 ![Resume Analyzer](screenshots/resume.png)
+
+---
+## Coding
+
+![Coding](screenshots/coding.png)
 
 ---
 
